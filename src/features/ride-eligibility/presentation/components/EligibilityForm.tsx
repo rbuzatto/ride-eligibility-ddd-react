@@ -1,3 +1,6 @@
+import { Button } from '@/shared/ui/button'
+import { Label } from '@/shared/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import type { Bike } from '../../domain/entities/Bike'
 import type { Station } from '../../domain/entities/Station'
 import type { User } from '../../domain/entities/User'
@@ -9,9 +12,9 @@ type EligibilityFormProps = {
   selectedUserId: string
   selectedBikeId: string
   selectedStationId: string
-  onUserChange: (id: string) => void
-  onBikeChange: (id: string) => void
-  onStationChange: (id: string) => void
+  onUserChange: (id: string | null) => void
+  onBikeChange: (id: string | null) => void
+  onStationChange: (id: string | null) => void
   onSubmit: () => void
   canSubmit: boolean
 }
@@ -35,58 +38,59 @@ export function EligibilityForm({
         e.preventDefault()
         onSubmit()
       }}
+      className="flex flex-col gap-4"
     >
-      <div>
-        <label htmlFor="user-select">User</label>
-        <select
-          id="user-select"
-          value={selectedUserId}
-          onChange={(e) => onUserChange(e.target.value)}
-        >
-          <option value="">Select a user</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.name} ({user.planType} — {user.accountStatus})
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="user-select">User</Label>
+        <Select value={selectedUserId || undefined} onValueChange={onUserChange}>
+          <SelectTrigger id="user-select" className="w-full">
+            <SelectValue placeholder="Select a user" />
+          </SelectTrigger>
+          <SelectContent>
+            {users.map((user) => (
+              <SelectItem key={user.id} value={user.id}>
+                {user.name} ({user.planType} — {user.accountStatus})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div>
-        <label htmlFor="bike-select">Bike</label>
-        <select
-          id="bike-select"
-          value={selectedBikeId}
-          onChange={(e) => onBikeChange(e.target.value)}
-        >
-          <option value="">Select a bike</option>
-          {bikes.map((bike) => (
-            <option key={bike.id} value={bike.id}>
-              {bike.model} ({bike.bikeType} — {bike.availabilityStatus})
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="bike-select">Bike</Label>
+        <Select value={selectedBikeId || undefined} onValueChange={onBikeChange}>
+          <SelectTrigger id="bike-select" className="w-full">
+            <SelectValue placeholder="Select a bike" />
+          </SelectTrigger>
+          <SelectContent>
+            {bikes.map((bike) => (
+              <SelectItem key={bike.id} value={bike.id}>
+                {bike.model} ({bike.bikeType} — {bike.availabilityStatus})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div>
-        <label htmlFor="station-select">Station</label>
-        <select
-          id="station-select"
-          value={selectedStationId}
-          onChange={(e) => onStationChange(e.target.value)}
-        >
-          <option value="">Select a station</option>
-          {stations.map((station) => (
-            <option key={station.id} value={station.id}>
-              {station.name} ({station.isPickupAllowed ? 'Pickup allowed' : 'Pickup not allowed'})
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="station-select">Station</Label>
+        <Select value={selectedStationId || undefined} onValueChange={onStationChange}>
+          <SelectTrigger id="station-select" className="w-full">
+            <SelectValue placeholder="Select a station" />
+          </SelectTrigger>
+          <SelectContent>
+            {stations.map((station) => (
+              <SelectItem key={station.id} value={station.id}>
+                {station.name} ({station.isPickupAllowed ? 'Pickup allowed' : 'Pickup not allowed'})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <button type="submit" disabled={!canSubmit}>
+      <Button type="submit" disabled={!canSubmit}>
         Check Eligibility
-      </button>
+      </Button>
     </form>
   )
 }

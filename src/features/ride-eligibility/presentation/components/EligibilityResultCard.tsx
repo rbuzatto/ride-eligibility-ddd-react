@@ -1,3 +1,6 @@
+import { CheckCircle, XCircle } from 'lucide-react'
+import { Alert, AlertTitle } from '@/shared/ui/alert'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import type { EligibilityResult } from '../../domain/value-objects/EligibilityResult'
 
 type EligibilityResultCardProps = {
@@ -16,21 +19,37 @@ const blockReasonLabels: Record<string, string> = {
 export function EligibilityResultCard({ result }: EligibilityResultCardProps) {
   if (result.eligible) {
     return (
-      <div role="status" aria-label="Eligibility result">
-        <h2>Ride Allowed</h2>
-        <p>All eligibility checks passed. The ride can start.</p>
-      </div>
+      <Card role="status" aria-label="Eligibility result">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-green-600">
+            <CheckCircle className="size-5" />
+            Ride Allowed
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            All eligibility checks passed. The ride can start.
+          </p>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div role="status" aria-label="Eligibility result">
-      <h2>Ride Blocked</h2>
-      <ul>
+    <Card role="status" aria-label="Eligibility result">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <XCircle className="size-5" />
+          Ride Blocked
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-2">
         {result.reasons.map((reason) => (
-          <li key={reason}>{blockReasonLabels[reason] ?? reason}</li>
+          <Alert key={reason} variant="destructive">
+            <AlertTitle>{blockReasonLabels[reason] ?? reason}</AlertTitle>
+          </Alert>
         ))}
-      </ul>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

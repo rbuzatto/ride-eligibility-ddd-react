@@ -2,14 +2,25 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RideEligibilityPage } from './RideEligibilityPage'
 
+async function selectOption(
+  user: ReturnType<typeof userEvent.setup>,
+  triggerId: string,
+  optionText: string,
+) {
+  const trigger = document.getElementById(triggerId) as HTMLElement
+  await user.click(trigger)
+  const option = await screen.findByText(optionText, {}, { timeout: 2000 })
+  await user.click(option)
+}
+
 describe('RideEligibilityPage', () => {
   it('renders the heading and form elements', () => {
     render(<RideEligibilityPage />)
 
     expect(screen.getByText('Ride Eligibility Check')).toBeInTheDocument()
-    expect(screen.getByLabelText('User')).toBeInTheDocument()
-    expect(screen.getByLabelText('Bike')).toBeInTheDocument()
-    expect(screen.getByLabelText('Station')).toBeInTheDocument()
+    expect(screen.getByText('User')).toBeInTheDocument()
+    expect(screen.getByText('Bike')).toBeInTheDocument()
+    expect(screen.getByText('Station')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Check Eligibility' })).toBeDisabled()
   })
 
@@ -17,9 +28,9 @@ describe('RideEligibilityPage', () => {
     const user = userEvent.setup()
     render(<RideEligibilityPage />)
 
-    await user.selectOptions(screen.getByLabelText('User'), 'user-2')
-    await user.selectOptions(screen.getByLabelText('Bike'), 'bike-2')
-    await user.selectOptions(screen.getByLabelText('Station'), 'station-1')
+    await selectOption(user, 'user-select', 'Bruno Costa (Premium — Active)')
+    await selectOption(user, 'bike-select', 'Volt Pro (Electric — Available)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
 
     expect(screen.getByRole('button', { name: 'Check Eligibility' })).toBeEnabled()
   })
@@ -28,9 +39,9 @@ describe('RideEligibilityPage', () => {
     const user = userEvent.setup()
     render(<RideEligibilityPage />)
 
-    await user.selectOptions(screen.getByLabelText('User'), 'user-2')
-    await user.selectOptions(screen.getByLabelText('Bike'), 'bike-2')
-    await user.selectOptions(screen.getByLabelText('Station'), 'station-1')
+    await selectOption(user, 'user-select', 'Bruno Costa (Premium — Active)')
+    await selectOption(user, 'bike-select', 'Volt Pro (Electric — Available)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Allowed')).toBeInTheDocument()
@@ -40,10 +51,10 @@ describe('RideEligibilityPage', () => {
     const user = userEvent.setup()
     render(<RideEligibilityPage />)
 
-    // user-3 is inactive
-    await user.selectOptions(screen.getByLabelText('User'), 'user-3')
-    await user.selectOptions(screen.getByLabelText('Bike'), 'bike-1')
-    await user.selectOptions(screen.getByLabelText('Station'), 'station-1')
+    // Carla is inactive
+    await selectOption(user, 'user-select', 'Carla Mendes (Basic — Inactive)')
+    await selectOption(user, 'bike-select', 'City Cruiser (Standard — Available)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Blocked')).toBeInTheDocument()
@@ -54,10 +65,10 @@ describe('RideEligibilityPage', () => {
     const user = userEvent.setup()
     render(<RideEligibilityPage />)
 
-    // user-3 is inactive, bike-3 is unavailable, station-2 pickup not allowed
-    await user.selectOptions(screen.getByLabelText('User'), 'user-3')
-    await user.selectOptions(screen.getByLabelText('Bike'), 'bike-3')
-    await user.selectOptions(screen.getByLabelText('Station'), 'station-2')
+    // Carla is inactive, Urban Glide is unavailable, Estação Central has no pickup
+    await selectOption(user, 'user-select', 'Carla Mendes (Basic — Inactive)')
+    await selectOption(user, 'bike-select', 'Urban Glide (Standard — Unavailable)')
+    await selectOption(user, 'station-select', 'Estação Central (Pickup not allowed)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Blocked')).toBeInTheDocument()
@@ -70,9 +81,9 @@ describe('RideEligibilityPage', () => {
     const user = userEvent.setup()
     render(<RideEligibilityPage />)
 
-    await user.selectOptions(screen.getByLabelText('User'), 'user-2')
-    await user.selectOptions(screen.getByLabelText('Bike'), 'bike-2')
-    await user.selectOptions(screen.getByLabelText('Station'), 'station-1')
+    await selectOption(user, 'user-select', 'Bruno Costa (Premium — Active)')
+    await selectOption(user, 'bike-select', 'Volt Pro (Electric — Available)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Allowed')).toBeInTheDocument()

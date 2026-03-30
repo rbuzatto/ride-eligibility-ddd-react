@@ -41,6 +41,18 @@ export function useRideEligibility() {
     setError(null)
   }
 
+  function handleUserChange(id: string | null) {
+    setSelectedUserId(id ?? '')
+  }
+
+  function handleBikeChange(id: string | null) {
+    setSelectedBikeId(id ?? '')
+  }
+
+  function handleStationChange(id: string | null) {
+    setSelectedStationId(id ?? '')
+  }
+
   return {
     users,
     bikes,
@@ -48,9 +60,9 @@ export function useRideEligibility() {
     selectedUserId,
     selectedBikeId,
     selectedStationId,
-    setSelectedUserId,
-    setSelectedBikeId,
-    setSelectedStationId,
+    setSelectedUserId: handleUserChange,
+    setSelectedBikeId: handleBikeChange,
+    setSelectedStationId: handleStationChange,
     canSubmit,
     result,
     error,
