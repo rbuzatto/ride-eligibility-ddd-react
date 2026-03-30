@@ -1,6 +1,16 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { rideEligibilityModule } from '../../index'
+import { RideEligibilityProvider } from '../context/RideEligibilityContext'
 import { RideEligibilityPage } from './RideEligibilityPage'
+
+function renderPage() {
+  return render(
+    <RideEligibilityProvider module={rideEligibilityModule}>
+      <RideEligibilityPage />
+    </RideEligibilityProvider>,
+  )
+}
 
 async function selectOption(
   user: ReturnType<typeof userEvent.setup>,
@@ -15,7 +25,7 @@ async function selectOption(
 
 describe('RideEligibilityPage', () => {
   it('renders the heading and form elements', () => {
-    render(<RideEligibilityPage />)
+    renderPage()
 
     expect(screen.getByText('Ride Eligibility Check')).toBeInTheDocument()
     expect(screen.getByText('User')).toBeInTheDocument()
@@ -26,22 +36,22 @@ describe('RideEligibilityPage', () => {
 
   it('enables submit button when all selections are made', async () => {
     const user = userEvent.setup()
-    render(<RideEligibilityPage />)
+    renderPage()
 
     await selectOption(user, 'user-select', 'Bruno Costa (Premium — Active)')
     await selectOption(user, 'bike-select', 'Volt Pro (Electric — Available)')
-    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Allowed)')
 
     expect(screen.getByRole('button', { name: 'Check Eligibility' })).toBeEnabled()
   })
 
   it('displays allowed result for eligible combination', async () => {
     const user = userEvent.setup()
-    render(<RideEligibilityPage />)
+    renderPage()
 
     await selectOption(user, 'user-select', 'Bruno Costa (Premium — Active)')
     await selectOption(user, 'bike-select', 'Volt Pro (Electric — Available)')
-    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Allowed)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Allowed')).toBeInTheDocument()
@@ -49,41 +59,41 @@ describe('RideEligibilityPage', () => {
 
   it('displays block reasons for ineligible combination', async () => {
     const user = userEvent.setup()
-    render(<RideEligibilityPage />)
+    renderPage()
 
     // Carla is inactive
     await selectOption(user, 'user-select', 'Carla Mendes (Basic — Inactive)')
     await selectOption(user, 'bike-select', 'City Cruiser (Standard — Available)')
-    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Allowed)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Blocked')).toBeInTheDocument()
     expect(screen.getByText('Account is inactive')).toBeInTheDocument()
   })
 
-  it('displays multiple block reasons', async () => {
+  it('displays hard blocks and soft blocks separately', async () => {
     const user = userEvent.setup()
-    render(<RideEligibilityPage />)
+    renderPage()
 
-    // Carla is inactive, Urban Glide is unavailable, Estação Central has no pickup
+    // Carla is inactive (hard), bike unavailable (hard), station suspended (soft)
     await selectOption(user, 'user-select', 'Carla Mendes (Basic — Inactive)')
     await selectOption(user, 'bike-select', 'Urban Glide (Standard — Unavailable)')
-    await selectOption(user, 'station-select', 'Estação Central (Pickup not allowed)')
+    await selectOption(user, 'station-select', 'Estação Central (Suspended)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Blocked')).toBeInTheDocument()
     expect(screen.getByText('Account is inactive')).toBeInTheDocument()
     expect(screen.getByText('Bike is not available')).toBeInTheDocument()
-    expect(screen.getByText('Pickup is not allowed at this station')).toBeInTheDocument()
+    expect(screen.getByText('Pickup is not available at this station')).toBeInTheDocument()
   })
 
   it('resets form and result when reset is clicked', async () => {
     const user = userEvent.setup()
-    render(<RideEligibilityPage />)
+    renderPage()
 
     await selectOption(user, 'user-select', 'Bruno Costa (Premium — Active)')
     await selectOption(user, 'bike-select', 'Volt Pro (Electric — Available)')
-    await selectOption(user, 'station-select', 'Praça da Liberdade (Pickup allowed)')
+    await selectOption(user, 'station-select', 'Praça da Liberdade (Allowed)')
     await user.click(screen.getByRole('button', { name: 'Check Eligibility' }))
 
     expect(screen.getByText('Ride Allowed')).toBeInTheDocument()

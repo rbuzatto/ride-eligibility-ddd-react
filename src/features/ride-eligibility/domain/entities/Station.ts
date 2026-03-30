@@ -1,5 +1,7 @@
+import type { PickupPolicy } from '../value-objects/PickupPolicy'
+
 export type Station = {
-  id: string
-  name: string
-  isPickupAllowed: boolean
+  readonly id: string
+  readonly name: string
+  readonly pickupPolicy: PickupPolicy
 }

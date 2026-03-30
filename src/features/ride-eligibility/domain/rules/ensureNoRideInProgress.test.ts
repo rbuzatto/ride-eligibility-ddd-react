@@ -5,7 +5,7 @@ const baseUser: User = {
   id: 'user-1',
   name: 'Test User',
   accountStatus: 'Active',
-  isBlocked: false,
+  operationalStatus: 'Clear',
   hasRideInProgress: false,
   planType: 'Basic',
 }
@@ -15,8 +15,11 @@ describe('ensureNoRideInProgress', () => {
     expect(ensureNoRideInProgress(baseUser)).toBeNull()
   })
 
-  it('returns RideInProgress when user has a ride in progress', () => {
+  it('returns RideInProgress block reason when user has a ride in progress', () => {
     const user: User = { ...baseUser, hasRideInProgress: true }
-    expect(ensureNoRideInProgress(user)).toBe('RideInProgress')
+    const result = ensureNoRideInProgress(user)
+    expect(result).toEqual(
+      expect.objectContaining({ code: 'RideInProgress', severity: 'Hard', category: 'Ride' }),
+    )
   })
 })

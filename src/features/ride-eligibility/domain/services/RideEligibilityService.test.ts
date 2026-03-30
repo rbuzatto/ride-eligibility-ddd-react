@@ -7,7 +7,7 @@ const validUser: User = {
   id: 'user-1',
   name: 'Valid User',
   accountStatus: 'Active',
-  isBlocked: false,
+  operationalStatus: 'Clear',
   hasRideInProgress: false,
   planType: 'Premium',
 }
@@ -22,55 +22,74 @@ const availableBike: Bike = {
 const validStation: Station = {
   id: 'station-1',
   name: 'Test Station',
-  isPickupAllowed: true,
+  pickupPolicy: 'Allowed',
 }
 
 describe('RideEligibilityService', () => {
-  it('returns eligible when all rules pass', () => {
+  it('returns eligible with evaluatedAt when all rules pass', () => {
     const result = checkEligibility(validUser, availableBike, validStation)
-    expect(result).toEqual({ eligible: true })
+    expect(result.eligible).toBe(true)
+    expect(result.evaluatedAt).toBeInstanceOf(Date)
   })
 
-  it('returns blocked with one reason when one rule fails', () => {
+  it('returns ineligible with one hard block reason', () => {
     const inactiveUser: User = { ...validUser, accountStatus: 'Inactive' }
     const result = checkEligibility(inactiveUser, availableBike, validStation)
 
     expect(result.eligible).toBe(false)
     if (!result.eligible) {
-      expect(result.reasons).toEqual(['InactiveAccount'])
+      expect(result.reasons).toHaveLength(1)
+      expect(result.reasons[0].code).toBe('InactiveAccount')
+      expect(result.hardBlocks).toHaveLength(1)
+      expect(result.softBlocks).toHaveLength(0)
     }
   })
 
-  it('returns blocked with multiple reasons when multiple rules fail', () => {
+  it('partitions hard blocks and soft blocks correctly', () => {
+    const basicUser: User = { ...validUser, planType: 'Basic' }
+    const suspendedStation: Station = { ...validStation, pickupPolicy: 'Suspended' }
+    const result = checkEligibility(basicUser, availableBike, suspendedStation)
+
+    expect(result.eligible).toBe(false)
+    if (!result.eligible) {
+      expect(result.hardBlocks).toHaveLength(0)
+      expect(result.softBlocks).toHaveLength(2)
+      expect(result.softBlocks.map((r) => r.code)).toContain('PlanNotCompatible')
+      expect(result.softBlocks.map((r) => r.code)).toContain('PickupNotAllowed')
+    }
+  })
+
+  it('returns multiple reasons across categories when multiple rules fail', () => {
     const problematicUser: User = {
       ...validUser,
       accountStatus: 'Inactive',
-      isBlocked: true,
+      operationalStatus: 'Blocked',
       hasRideInProgress: true,
     }
     const unavailableBike: Bike = { ...availableBike, availabilityStatus: 'Unavailable' }
-    const blockedStation: Station = { ...validStation, isPickupAllowed: false }
+    const blockedStation: Station = { ...validStation, pickupPolicy: 'ClosedForMaintenance' }
 
     const result = checkEligibility(problematicUser, unavailableBike, blockedStation)
 
     expect(result.eligible).toBe(false)
     if (!result.eligible) {
-      expect(result.reasons).toContain('InactiveAccount')
-      expect(result.reasons).toContain('OperationalBlock')
-      expect(result.reasons).toContain('RideInProgress')
-      expect(result.reasons).toContain('BikeUnavailable')
-      expect(result.reasons).toContain('PickupNotAllowed')
-      expect(result.reasons.length).toBe(5)
+      expect(result.reasons.map((r) => r.code)).toContain('InactiveAccount')
+      expect(result.reasons.map((r) => r.code)).toContain('OperationalBlock')
+      expect(result.reasons.map((r) => r.code)).toContain('RideInProgress')
+      expect(result.reasons.map((r) => r.code)).toContain('BikeUnavailable')
+      expect(result.reasons.map((r) => r.code)).toContain('PickupNotAllowed')
+      expect(result.hardBlocks.length).toBeGreaterThan(0)
     }
   })
 
-  it('blocks basic user trying to rent electric bike', () => {
+  it('blocks basic user trying to rent electric bike with soft severity', () => {
     const basicUser: User = { ...validUser, planType: 'Basic' }
     const result = checkEligibility(basicUser, availableBike, validStation)
 
     expect(result.eligible).toBe(false)
     if (!result.eligible) {
-      expect(result.reasons).toEqual(['PlanNotCompatible'])
+      expect(result.softBlocks).toHaveLength(1)
+      expect(result.softBlocks[0].code).toBe('PlanNotCompatible')
     }
   })
 
@@ -79,16 +98,28 @@ describe('RideEligibilityService', () => {
     const standardBike: Bike = { ...availableBike, bikeType: 'Standard' }
     const result = checkEligibility(basicUser, standardBike, validStation)
 
-    expect(result).toEqual({ eligible: true })
+    expect(result.eligible).toBe(true)
   })
 
-  it('does not produce duplicate reasons', () => {
+  it('does not produce duplicate reason codes', () => {
     const user: User = { ...validUser, accountStatus: 'Inactive' }
     const result = checkEligibility(user, availableBike, validStation)
 
     if (!result.eligible) {
-      const unique = new Set(result.reasons)
-      expect(unique.size).toBe(result.reasons.length)
+      const codes = result.reasons.map((r) => r.code)
+      const unique = new Set(codes)
+      expect(unique.size).toBe(codes.length)
+    }
+  })
+
+  it('each block reason carries a non-empty message', () => {
+    const user: User = { ...validUser, accountStatus: 'Inactive', operationalStatus: 'Blocked' }
+    const result = checkEligibility(user, availableBike, validStation)
+
+    if (!result.eligible) {
+      for (const reason of result.reasons) {
+        expect(reason.message).toBeTruthy()
+      }
     }
   })
 })

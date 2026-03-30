@@ -6,7 +6,7 @@ const baseUser: User = {
   id: 'user-1',
   name: 'Test User',
   accountStatus: 'Active',
-  isBlocked: false,
+  operationalStatus: 'Clear',
   hasRideInProgress: false,
   planType: 'Basic',
 }
@@ -30,8 +30,11 @@ describe('ensurePlanCompatibility', () => {
     expect(ensurePlanCompatibility(baseUser, standardBike)).toBeNull()
   })
 
-  it('returns PlanNotCompatible when basic user selects electric bike', () => {
-    expect(ensurePlanCompatibility(baseUser, electricBike)).toBe('PlanNotCompatible')
+  it('returns PlanNotCompatible (soft) when basic user selects electric bike', () => {
+    const result = ensurePlanCompatibility(baseUser, electricBike)
+    expect(result).toEqual(
+      expect.objectContaining({ code: 'PlanNotCompatible', severity: 'Soft', category: 'Bike' }),
+    )
   })
 
   it('returns null when premium user selects standard bike', () => {

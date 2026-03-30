@@ -81,7 +81,7 @@ export function EligibilityForm({
           <SelectContent>
             {stations.map((station) => (
               <SelectItem key={station.id} value={station.id}>
-                {station.name} ({station.isPickupAllowed ? 'Pickup allowed' : 'Pickup not allowed'})
+                {station.name} ({station.pickupPolicy})
               </SelectItem>
             ))}
           </SelectContent>

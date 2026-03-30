@@ -1,23 +1,14 @@
-import { CheckCircle, XCircle } from 'lucide-react'
+import { CheckCircle, ShieldAlert, TriangleAlert, XCircle } from 'lucide-react'
 import { Alert, AlertTitle } from '@/shared/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
-import type { EligibilityResult } from '../../domain/value-objects/EligibilityResult'
+import type { EligibilityCheckViewModel } from '../view-models/EligibilityViewModel'
 
 type EligibilityResultCardProps = {
-  result: EligibilityResult
+  viewModel: Extract<EligibilityCheckViewModel, { status: 'eligible' | 'ineligible' }>
 }
 
-const blockReasonLabels: Record<string, string> = {
-  InactiveAccount: 'Account is inactive',
-  OperationalBlock: 'User has an operational block',
-  RideInProgress: 'User already has a ride in progress',
-  BikeUnavailable: 'Bike is not available',
-  PlanNotCompatible: 'User plan does not support this bike type',
-  PickupNotAllowed: 'Pickup is not allowed at this station',
-}
-
-export function EligibilityResultCard({ result }: EligibilityResultCardProps) {
-  if (result.eligible) {
+export function EligibilityResultCard({ viewModel }: EligibilityResultCardProps) {
+  if (viewModel.status === 'eligible') {
     return (
       <Card role="status" aria-label="Eligibility result">
         <CardHeader>
@@ -30,6 +21,7 @@ export function EligibilityResultCard({ result }: EligibilityResultCardProps) {
           <p className="text-muted-foreground">
             All eligibility checks passed. The ride can start.
           </p>
+          <p className="mt-1 text-xs text-muted-foreground">Evaluated at {viewModel.evaluatedAt}</p>
         </CardContent>
       </Card>
     )
@@ -44,11 +36,27 @@ export function EligibilityResultCard({ result }: EligibilityResultCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {result.reasons.map((reason) => (
-          <Alert key={reason} variant="destructive">
-            <AlertTitle>{blockReasonLabels[reason] ?? reason}</AlertTitle>
-          </Alert>
-        ))}
+        {viewModel.hardBlocks.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {viewModel.hardBlocks.map((reason) => (
+              <Alert key={reason.code} variant="destructive">
+                <ShieldAlert className="size-4" />
+                <AlertTitle>{reason.label}</AlertTitle>
+              </Alert>
+            ))}
+          </div>
+        )}
+        {viewModel.softBlocks.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {viewModel.softBlocks.map((reason) => (
+              <Alert key={reason.code}>
+                <TriangleAlert className="size-4" />
+                <AlertTitle>{reason.label}</AlertTitle>
+              </Alert>
+            ))}
+          </div>
+        )}
+        <p className="mt-1 text-xs text-muted-foreground">Evaluated at {viewModel.evaluatedAt}</p>
       </CardContent>
     </Card>
   )

@@ -16,8 +16,7 @@ export function RideEligibilityPage() {
     setSelectedBikeId,
     setSelectedStationId,
     canSubmit,
-    result,
-    error,
+    viewModel,
     handleCheck,
     handleReset,
   } = useRideEligibility()
@@ -27,7 +26,7 @@ export function RideEligibilityPage() {
       <div className="mx-auto w-full max-w-md space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Ride Eligibility Check</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Select a user, bike, and station to verify eligibility.
           </p>
         </div>
@@ -46,16 +45,18 @@ export function RideEligibilityPage() {
           canSubmit={canSubmit}
         />
 
-        {error && (
+        {viewModel.status === 'system_error' && (
           <Alert variant="destructive">
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{viewModel.message}</AlertDescription>
           </Alert>
         )}
 
-        {result && <EligibilityResultCard result={result} />}
+        {(viewModel.status === 'eligible' || viewModel.status === 'ineligible') && (
+          <EligibilityResultCard viewModel={viewModel} />
+        )}
 
-        {(result || error) && (
+        {viewModel.status !== 'idle' && (
           <Button variant="outline" className="w-full" onClick={handleReset}>
             Reset
           </Button>

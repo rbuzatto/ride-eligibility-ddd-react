@@ -5,7 +5,7 @@ const baseUser: User = {
   id: 'user-1',
   name: 'Test User',
   accountStatus: 'Active',
-  isBlocked: false,
+  operationalStatus: 'Clear',
   hasRideInProgress: false,
   planType: 'Basic',
 }
@@ -15,8 +15,11 @@ describe('ensureActiveAccount', () => {
     expect(ensureActiveAccount(baseUser)).toBeNull()
   })
 
-  it('returns InactiveAccount when account is inactive', () => {
+  it('returns InactiveAccount block reason when account is inactive', () => {
     const user: User = { ...baseUser, accountStatus: 'Inactive' }
-    expect(ensureActiveAccount(user)).toBe('InactiveAccount')
+    const result = ensureActiveAccount(user)
+    expect(result).toEqual(
+      expect.objectContaining({ code: 'InactiveAccount', severity: 'Hard', category: 'Account' }),
+    )
   })
 })

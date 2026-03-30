@@ -4,6 +4,13 @@ import type { BikeRepository } from '../ports/BikeRepository'
 import type { StationRepository } from '../ports/StationRepository'
 import type { UserRepository } from '../ports/UserRepository'
 
+export type CheckRideEligibilityCommand = {
+  readonly userId: string
+  readonly bikeId: string
+  readonly stationId: string
+  readonly requestedAt: Date
+}
+
 export type CheckRideEligibilityDeps = {
   userRepository: UserRepository
   bikeRepository: BikeRepository
@@ -11,29 +18,29 @@ export type CheckRideEligibilityDeps = {
 }
 
 export type CheckRideEligibilityResult =
-  | { success: true; result: EligibilityResult }
-  | { success: false; error: string }
+  | { outcome: 'decided'; result: EligibilityResult }
+  | { outcome: 'entity_not_found'; entity: 'User' | 'Bike' | 'Station'; id: string }
 
 export function createCheckRideEligibility(deps: CheckRideEligibilityDeps) {
   return {
-    execute(userId: string, bikeId: string, stationId: string): CheckRideEligibilityResult {
-      const user = deps.userRepository.findById(userId)
+    execute(command: CheckRideEligibilityCommand): CheckRideEligibilityResult {
+      const user = deps.userRepository.findById(command.userId)
       if (!user) {
-        return { success: false, error: `User not found: ${userId}` }
+        return { outcome: 'entity_not_found', entity: 'User', id: command.userId }
       }
 
-      const bike = deps.bikeRepository.findById(bikeId)
+      const bike = deps.bikeRepository.findById(command.bikeId)
       if (!bike) {
-        return { success: false, error: `Bike not found: ${bikeId}` }
+        return { outcome: 'entity_not_found', entity: 'Bike', id: command.bikeId }
       }
 
-      const station = deps.stationRepository.findById(stationId)
+      const station = deps.stationRepository.findById(command.stationId)
       if (!station) {
-        return { success: false, error: `Station not found: ${stationId}` }
+        return { outcome: 'entity_not_found', entity: 'Station', id: command.stationId }
       }
 
       const result = checkEligibility(user, bike, station)
-      return { success: true, result }
+      return { outcome: 'decided', result }
     },
   }
 }

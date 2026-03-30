@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import type { EligibilityResult } from '../../domain/value-objects/EligibilityResult'
-import {
-  bikeRepository,
-  checkRideEligibility,
-  stationRepository,
-  userRepository,
-} from '../../index'
+import type { CheckRideEligibilityResult } from '../../application/use-cases/CheckRideEligibility'
+import { useRideEligibilityModule } from '../context/RideEligibilityContext'
+import type { EligibilityCheckViewModel } from '../view-models/EligibilityViewModel'
+import { mapToEligibilityViewModel } from '../view-models/mapToEligibilityViewModel'
 
 export function useRideEligibility() {
+  const { userRepository, bikeRepository, stationRepository, checkRideEligibility } =
+    useRideEligibilityModule()
+
   const users = userRepository.findAll()
   const bikes = bikeRepository.findAll()
   const stations = stationRepository.findAll()
@@ -15,30 +15,26 @@ export function useRideEligibility() {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [selectedBikeId, setSelectedBikeId] = useState('')
   const [selectedStationId, setSelectedStationId] = useState('')
-  const [result, setResult] = useState<EligibilityResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [viewModel, setViewModel] = useState<EligibilityCheckViewModel>({ status: 'idle' })
 
   const canSubmit = selectedUserId !== '' && selectedBikeId !== '' && selectedStationId !== ''
 
   function handleCheck() {
-    setError(null)
-    setResult(null)
+    const result: CheckRideEligibilityResult = checkRideEligibility.execute({
+      userId: selectedUserId,
+      bikeId: selectedBikeId,
+      stationId: selectedStationId,
+      requestedAt: new Date(),
+    })
 
-    const outcome = checkRideEligibility.execute(selectedUserId, selectedBikeId, selectedStationId)
-
-    if (outcome.success) {
-      setResult(outcome.result)
-    } else {
-      setError(outcome.error)
-    }
+    setViewModel(mapToEligibilityViewModel(result))
   }
 
   function handleReset() {
     setSelectedUserId('')
     setSelectedBikeId('')
     setSelectedStationId('')
-    setResult(null)
-    setError(null)
+    setViewModel({ status: 'idle' })
   }
 
   function handleUserChange(id: string | null) {
@@ -64,8 +60,7 @@ export function useRideEligibility() {
     setSelectedBikeId: handleBikeChange,
     setSelectedStationId: handleStationChange,
     canSubmit,
-    result,
-    error,
+    viewModel,
     handleCheck,
     handleReset,
   }

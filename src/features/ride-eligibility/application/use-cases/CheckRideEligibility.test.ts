@@ -4,13 +4,16 @@ import type { User } from '../../domain/entities/User'
 import type { BikeRepository } from '../ports/BikeRepository'
 import type { StationRepository } from '../ports/StationRepository'
 import type { UserRepository } from '../ports/UserRepository'
-import { createCheckRideEligibility } from './CheckRideEligibility'
+import {
+  type CheckRideEligibilityCommand,
+  createCheckRideEligibility,
+} from './CheckRideEligibility'
 
 const validUser: User = {
   id: 'user-1',
   name: 'Valid User',
   accountStatus: 'Active',
-  isBlocked: false,
+  operationalStatus: 'Clear',
   hasRideInProgress: false,
   planType: 'Premium',
 }
@@ -25,7 +28,19 @@ const availableBike: Bike = {
 const validStation: Station = {
   id: 'station-1',
   name: 'Test Station',
-  isPickupAllowed: true,
+  pickupPolicy: 'Allowed',
+}
+
+function createCommand(
+  overrides?: Partial<CheckRideEligibilityCommand>,
+): CheckRideEligibilityCommand {
+  return {
+    userId: 'user-1',
+    bikeId: 'bike-1',
+    stationId: 'station-1',
+    requestedAt: new Date(),
+    ...overrides,
+  }
 }
 
 function createTestRepositories(overrides?: {
@@ -56,63 +71,66 @@ function createTestRepositories(overrides?: {
 }
 
 describe('CheckRideEligibility', () => {
-  it('returns eligible result for valid inputs', () => {
+  it('returns decided outcome with eligible result for valid inputs', () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute('user-1', 'bike-1', 'station-1')
+    const outcome = useCase.execute(createCommand())
 
-    expect(outcome.success).toBe(true)
-    if (outcome.success) {
-      expect(outcome.result).toEqual({ eligible: true })
+    expect(outcome.outcome).toBe('decided')
+    if (outcome.outcome === 'decided') {
+      expect(outcome.result.eligible).toBe(true)
     }
   })
 
-  it('returns error when user is not found', () => {
+  it('returns entity_not_found when user does not exist', () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute('unknown', 'bike-1', 'station-1')
+    const outcome = useCase.execute(createCommand({ userId: 'unknown' }))
 
-    expect(outcome.success).toBe(false)
-    if (!outcome.success) {
-      expect(outcome.error).toContain('User not found')
-    }
+    expect(outcome).toEqual({
+      outcome: 'entity_not_found',
+      entity: 'User',
+      id: 'unknown',
+    })
   })
 
-  it('returns error when bike is not found', () => {
+  it('returns entity_not_found when bike does not exist', () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute('user-1', 'unknown', 'station-1')
+    const outcome = useCase.execute(createCommand({ bikeId: 'unknown' }))
 
-    expect(outcome.success).toBe(false)
-    if (!outcome.success) {
-      expect(outcome.error).toContain('Bike not found')
-    }
+    expect(outcome).toEqual({
+      outcome: 'entity_not_found',
+      entity: 'Bike',
+      id: 'unknown',
+    })
   })
 
-  it('returns error when station is not found', () => {
+  it('returns entity_not_found when station does not exist', () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute('user-1', 'bike-1', 'unknown')
+    const outcome = useCase.execute(createCommand({ stationId: 'unknown' }))
 
-    expect(outcome.success).toBe(false)
-    if (!outcome.success) {
-      expect(outcome.error).toContain('Station not found')
-    }
+    expect(outcome).toEqual({
+      outcome: 'entity_not_found',
+      entity: 'Station',
+      id: 'unknown',
+    })
   })
 
-  it('returns blocked result when domain rules fail', () => {
+  it('returns decided outcome with ineligible result when domain rules fail', () => {
     const inactiveUser: User = { ...validUser, accountStatus: 'Inactive' }
     const deps = createTestRepositories({ users: [inactiveUser] })
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute('user-1', 'bike-1', 'station-1')
+    const outcome = useCase.execute(createCommand())
 
-    expect(outcome.success).toBe(true)
-    if (outcome.success) {
+    expect(outcome.outcome).toBe('decided')
+    if (outcome.outcome === 'decided') {
       expect(outcome.result.eligible).toBe(false)
     }
   })

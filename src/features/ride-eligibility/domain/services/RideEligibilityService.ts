@@ -20,9 +20,17 @@ export function checkEligibility(user: User, bike: Bike, station: Station): Elig
     ensurePickupIsAllowed(station),
   ].filter((reason): reason is BlockReason => reason !== null)
 
+  const evaluatedAt = new Date()
+
   if (reasons.length === 0) {
-    return { eligible: true }
+    return { eligible: true, evaluatedAt }
   }
 
-  return { eligible: false, reasons }
+  return {
+    eligible: false,
+    reasons,
+    hardBlocks: reasons.filter((r) => r.severity === 'Hard'),
+    softBlocks: reasons.filter((r) => r.severity === 'Soft'),
+    evaluatedAt,
+  }
 }

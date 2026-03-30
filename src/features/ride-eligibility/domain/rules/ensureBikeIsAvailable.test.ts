@@ -13,8 +13,11 @@ describe('ensureBikeIsAvailable', () => {
     expect(ensureBikeIsAvailable(baseBike)).toBeNull()
   })
 
-  it('returns BikeUnavailable when bike is unavailable', () => {
+  it('returns BikeUnavailable block reason when bike is unavailable', () => {
     const bike: Bike = { ...baseBike, availabilityStatus: 'Unavailable' }
-    expect(ensureBikeIsAvailable(bike)).toBe('BikeUnavailable')
+    const result = ensureBikeIsAvailable(bike)
+    expect(result).toEqual(
+      expect.objectContaining({ code: 'BikeUnavailable', severity: 'Hard', category: 'Bike' }),
+    )
   })
 })

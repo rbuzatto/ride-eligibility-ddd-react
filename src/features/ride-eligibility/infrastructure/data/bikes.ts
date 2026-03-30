@@ -19,4 +19,10 @@ export const bikes: Bike[] = [
     bikeType: 'Standard',
     availabilityStatus: 'Unavailable',
   },
+  {
+    id: 'bike-4',
+    model: 'Thunder X',
+    bikeType: 'Electric',
+    availabilityStatus: 'Unavailable',
+  },
 ]
