@@ -1,5 +1,5 @@
-import type { AccountStatus } from '../value-objects/AccountStatus'
-import type { OperationalStatus } from '../value-objects/OperationalStatus'
+import { type AccountStatus, isActive } from '../value-objects/AccountStatus'
+import { allowsRideStart, type OperationalStatus } from '../value-objects/OperationalStatus'
 import type { PlanType } from '../value-objects/PlanType'
 
 export type User = {
@@ -9,4 +9,16 @@ export type User = {
   readonly operationalStatus: OperationalStatus
   readonly hasRideInProgress: boolean
   readonly planType: PlanType
+}
+
+export function isAccountActive(user: User): boolean {
+  return isActive(user.accountStatus)
+}
+
+export function hasOperationalRestriction(user: User): boolean {
+  return !allowsRideStart(user.operationalStatus)
+}
+
+export function canStartNewRide(user: User): boolean {
+  return isAccountActive(user) && !hasOperationalRestriction(user) && !user.hasRideInProgress
 }
