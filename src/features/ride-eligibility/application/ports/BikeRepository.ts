@@ -1,6 +1,6 @@
 import type { Bike } from '../../domain/entities/Bike'
 
 export type BikeRepository = {
-  findById(id: string): Bike | null
-  findAll(): Bike[]
+  findById(id: string): Promise<Bike | null>
+  findAll(): Promise<Bike[]>
 }

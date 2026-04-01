@@ -1,18 +1,14 @@
 import { createContext, type ReactNode, useContext } from 'react'
-import type { BikeRepository } from '../../application/ports/BikeRepository'
-import type { StationRepository } from '../../application/ports/StationRepository'
-import type { UserRepository } from '../../application/ports/UserRepository'
+import type { RideEligibilityQueries } from '../../application/queries/RideEligibilityQueries'
 import type {
   CheckRideEligibilityCommand,
   CheckRideEligibilityResult,
 } from '../../application/use-cases/CheckRideEligibility'
 
 export type RideEligibilityModule = {
-  userRepository: UserRepository
-  bikeRepository: BikeRepository
-  stationRepository: StationRepository
+  queries: RideEligibilityQueries
   checkRideEligibility: {
-    execute(command: CheckRideEligibilityCommand): CheckRideEligibilityResult
+    execute(command: CheckRideEligibilityCommand): Promise<CheckRideEligibilityResult>
   }
 }
 

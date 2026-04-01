@@ -1,4 +1,5 @@
 import { createCheckRideEligibility } from './application/use-cases/CheckRideEligibility'
+import { createInMemoryRideEligibilityQueries } from './infrastructure/query-services/InMemoryRideEligibilityQueries'
 import { createInMemoryBikeRepository } from './infrastructure/repositories/InMemoryBikeRepository'
 import { createInMemoryStationRepository } from './infrastructure/repositories/InMemoryStationRepository'
 import { createInMemoryUserRepository } from './infrastructure/repositories/InMemoryUserRepository'
@@ -8,6 +9,12 @@ const userRepository = createInMemoryUserRepository()
 const bikeRepository = createInMemoryBikeRepository()
 const stationRepository = createInMemoryStationRepository()
 
+const queries = createInMemoryRideEligibilityQueries({
+  userRepository,
+  bikeRepository,
+  stationRepository,
+})
+
 const checkRideEligibility = createCheckRideEligibility({
   userRepository,
   bikeRepository,
@@ -15,8 +22,6 @@ const checkRideEligibility = createCheckRideEligibility({
 })
 
 export const rideEligibilityModule: RideEligibilityModule = {
-  userRepository,
-  bikeRepository,
-  stationRepository,
+  queries,
   checkRideEligibility,
 }

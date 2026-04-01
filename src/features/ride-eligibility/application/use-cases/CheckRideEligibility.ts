@@ -23,18 +23,18 @@ export type CheckRideEligibilityResult =
 
 export function createCheckRideEligibility(deps: CheckRideEligibilityDeps) {
   return {
-    execute(command: CheckRideEligibilityCommand): CheckRideEligibilityResult {
-      const user = deps.userRepository.findById(command.userId)
+    async execute(command: CheckRideEligibilityCommand): Promise<CheckRideEligibilityResult> {
+      const user = await deps.userRepository.findById(command.userId)
       if (!user) {
         return { outcome: 'entity_not_found', entity: 'User', id: command.userId }
       }
 
-      const bike = deps.bikeRepository.findById(command.bikeId)
+      const bike = await deps.bikeRepository.findById(command.bikeId)
       if (!bike) {
         return { outcome: 'entity_not_found', entity: 'Bike', id: command.bikeId }
       }
 
-      const station = deps.stationRepository.findById(command.stationId)
+      const station = await deps.stationRepository.findById(command.stationId)
       if (!station) {
         return { outcome: 'entity_not_found', entity: 'Station', id: command.stationId }
       }

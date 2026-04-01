@@ -9,6 +9,8 @@ export function RideEligibilityPage() {
     users,
     bikes,
     stations,
+    isLoading,
+    isError,
     selectedUserId,
     selectedBikeId,
     selectedStationId,
@@ -17,9 +19,33 @@ export function RideEligibilityPage() {
     setSelectedStationId,
     canSubmit,
     viewModel,
+    isPending,
     handleCheck,
     handleReset,
   } = useRideEligibility()
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-background px-4 py-10">
+        <div className="mx-auto w-full max-w-md">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (isError) {
+    return (
+      <main className="min-h-screen bg-background px-4 py-10">
+        <div className="mx-auto w-full max-w-md">
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>Failed to load data. Please try again.</AlertDescription>
+          </Alert>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-background px-4 py-10">
@@ -44,6 +70,8 @@ export function RideEligibilityPage() {
           onSubmit={handleCheck}
           canSubmit={canSubmit}
         />
+
+        {isPending && <p className="text-sm text-muted-foreground">Checking eligibility...</p>}
 
         {viewModel.status === 'system_error' && (
           <Alert variant="destructive">

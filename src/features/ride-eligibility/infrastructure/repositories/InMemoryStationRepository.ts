@@ -1,12 +1,15 @@
 import type { StationRepository } from '../../application/ports/StationRepository'
 import { stations } from '../data/stations'
+import { delay } from './delay'
 
 export function createInMemoryStationRepository(): StationRepository {
   return {
-    findById(id: string) {
+    async findById(id: string) {
+      await delay(80)
       return stations.find((station) => station.id === id) ?? null
     },
-    findAll() {
+    async findAll() {
+      await delay(150)
       return [...stations]
     },
   }

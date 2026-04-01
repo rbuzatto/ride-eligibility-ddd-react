@@ -53,29 +53,29 @@ function createTestRepositories(overrides?: {
   const stations = overrides?.stations ?? [validStation]
 
   const userRepository: UserRepository = {
-    findById: (id) => users.find((u) => u.id === id) ?? null,
-    findAll: () => [...users],
+    findById: async (id) => users.find((u) => u.id === id) ?? null,
+    findAll: async () => [...users],
   }
 
   const bikeRepository: BikeRepository = {
-    findById: (id) => bikes.find((b) => b.id === id) ?? null,
-    findAll: () => [...bikes],
+    findById: async (id) => bikes.find((b) => b.id === id) ?? null,
+    findAll: async () => [...bikes],
   }
 
   const stationRepository: StationRepository = {
-    findById: (id) => stations.find((s) => s.id === id) ?? null,
-    findAll: () => [...stations],
+    findById: async (id) => stations.find((s) => s.id === id) ?? null,
+    findAll: async () => [...stations],
   }
 
   return { userRepository, bikeRepository, stationRepository }
 }
 
 describe('CheckRideEligibility', () => {
-  it('returns decided outcome with eligible result for valid inputs', () => {
+  it('returns decided outcome with eligible result for valid inputs', async () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute(createCommand())
+    const outcome = await useCase.execute(createCommand())
 
     expect(outcome.outcome).toBe('decided')
     if (outcome.outcome === 'decided') {
@@ -83,11 +83,11 @@ describe('CheckRideEligibility', () => {
     }
   })
 
-  it('returns entity_not_found when user does not exist', () => {
+  it('returns entity_not_found when user does not exist', async () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute(createCommand({ userId: 'unknown' }))
+    const outcome = await useCase.execute(createCommand({ userId: 'unknown' }))
 
     expect(outcome).toEqual({
       outcome: 'entity_not_found',
@@ -96,11 +96,11 @@ describe('CheckRideEligibility', () => {
     })
   })
 
-  it('returns entity_not_found when bike does not exist', () => {
+  it('returns entity_not_found when bike does not exist', async () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute(createCommand({ bikeId: 'unknown' }))
+    const outcome = await useCase.execute(createCommand({ bikeId: 'unknown' }))
 
     expect(outcome).toEqual({
       outcome: 'entity_not_found',
@@ -109,11 +109,11 @@ describe('CheckRideEligibility', () => {
     })
   })
 
-  it('returns entity_not_found when station does not exist', () => {
+  it('returns entity_not_found when station does not exist', async () => {
     const deps = createTestRepositories()
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute(createCommand({ stationId: 'unknown' }))
+    const outcome = await useCase.execute(createCommand({ stationId: 'unknown' }))
 
     expect(outcome).toEqual({
       outcome: 'entity_not_found',
@@ -122,12 +122,12 @@ describe('CheckRideEligibility', () => {
     })
   })
 
-  it('returns decided outcome with ineligible result when domain rules fail', () => {
+  it('returns decided outcome with ineligible result when domain rules fail', async () => {
     const inactiveUser: User = { ...validUser, accountStatus: 'Inactive' }
     const deps = createTestRepositories({ users: [inactiveUser] })
     const useCase = createCheckRideEligibility(deps)
 
-    const outcome = useCase.execute(createCommand())
+    const outcome = await useCase.execute(createCommand())
 
     expect(outcome.outcome).toBe('decided')
     if (outcome.outcome === 'decided') {

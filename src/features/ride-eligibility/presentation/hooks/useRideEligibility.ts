@@ -1,33 +1,56 @@
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import type { CheckRideEligibilityResult } from '../../application/use-cases/CheckRideEligibility'
 import { useRideEligibilityModule } from '../context/RideEligibilityContext'
 import type { EligibilityCheckViewModel } from '../view-models/EligibilityViewModel'
 import { mapToEligibilityViewModel } from '../view-models/mapToEligibilityViewModel'
 
 export function useRideEligibility() {
-  const { userRepository, bikeRepository, stationRepository, checkRideEligibility } =
-    useRideEligibilityModule()
+  const { queries, checkRideEligibility } = useRideEligibilityModule()
 
-  const users = userRepository.findAll()
-  const bikes = bikeRepository.findAll()
-  const stations = stationRepository.findAll()
+  const usersQuery = useQuery({
+    queryKey: ['ride-eligibility', 'users'],
+    queryFn: () => queries.getUsers(),
+  })
+
+  const bikesQuery = useQuery({
+    queryKey: ['ride-eligibility', 'bikes'],
+    queryFn: () => queries.getBikes(),
+  })
+
+  const stationsQuery = useQuery({
+    queryKey: ['ride-eligibility', 'stations'],
+    queryFn: () => queries.getStations(),
+  })
 
   const [selectedUserId, setSelectedUserId] = useState('')
   const [selectedBikeId, setSelectedBikeId] = useState('')
   const [selectedStationId, setSelectedStationId] = useState('')
   const [viewModel, setViewModel] = useState<EligibilityCheckViewModel>({ status: 'idle' })
 
-  const canSubmit = selectedUserId !== '' && selectedBikeId !== '' && selectedStationId !== ''
+  const checkMutation = useMutation({
+    mutationFn: () =>
+      checkRideEligibility.execute({
+        userId: selectedUserId,
+        bikeId: selectedBikeId,
+        stationId: selectedStationId,
+        requestedAt: new Date(),
+      }),
+    onSuccess: (result) => {
+      setViewModel(mapToEligibilityViewModel(result))
+    },
+  })
+
+  const isLoading = usersQuery.isLoading || bikesQuery.isLoading || stationsQuery.isLoading
+  const isError = usersQuery.isError || bikesQuery.isError || stationsQuery.isError
+
+  const canSubmit =
+    selectedUserId !== '' &&
+    selectedBikeId !== '' &&
+    selectedStationId !== '' &&
+    !checkMutation.isPending
 
   function handleCheck() {
-    const result: CheckRideEligibilityResult = checkRideEligibility.execute({
-      userId: selectedUserId,
-      bikeId: selectedBikeId,
-      stationId: selectedStationId,
-      requestedAt: new Date(),
-    })
-
-    setViewModel(mapToEligibilityViewModel(result))
+    checkMutation.mutate()
   }
 
   function handleReset() {
@@ -35,6 +58,7 @@ export function useRideEligibility() {
     setSelectedBikeId('')
     setSelectedStationId('')
     setViewModel({ status: 'idle' })
+    checkMutation.reset()
   }
 
   function handleUserChange(id: string | null) {
@@ -50,9 +74,11 @@ export function useRideEligibility() {
   }
 
   return {
-    users,
-    bikes,
-    stations,
+    users: usersQuery.data ?? [],
+    bikes: bikesQuery.data ?? [],
+    stations: stationsQuery.data ?? [],
+    isLoading,
+    isError,
     selectedUserId,
     selectedBikeId,
     selectedStationId,
@@ -61,6 +87,7 @@ export function useRideEligibility() {
     setSelectedStationId: handleStationChange,
     canSubmit,
     viewModel,
+    isPending: checkMutation.isPending,
     handleCheck,
     handleReset,
   }
