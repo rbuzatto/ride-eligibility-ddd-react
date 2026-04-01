@@ -1,4 +1,12 @@
-import { canStartNewRide, hasOperationalRestriction, isAccountActive, type User } from './User'
+import {
+  canStartNewRide,
+  checkAccountEligibility,
+  checkOperationalRideEligibility,
+  checkRideStartAvailability,
+  hasOperationalRestriction,
+  isAccountActive,
+  type User,
+} from './User'
 
 const baseUser: User = {
   id: 'user-1',
@@ -9,7 +17,7 @@ const baseUser: User = {
   planType: 'Basic',
 }
 
-describe('User domain functions', () => {
+describe('User pure predicates', () => {
   describe('isAccountActive', () => {
     it('returns true for active account', () => {
       expect(isAccountActive(baseUser)).toBe(true)
@@ -62,6 +70,55 @@ describe('User domain functions', () => {
           hasRideInProgress: true,
         }),
       ).toBe(false)
+    })
+  })
+})
+
+describe('User eligibility evaluation', () => {
+  describe('checkAccountEligibility', () => {
+    it('returns null when account is active', () => {
+      expect(checkAccountEligibility(baseUser)).toBeNull()
+    })
+
+    it('returns InactiveAccount block reason when account is inactive', () => {
+      const result = checkAccountEligibility({ ...baseUser, accountStatus: 'Inactive' })
+      expect(result).toEqual(
+        expect.objectContaining({ code: 'InactiveAccount', severity: 'Hard', category: 'Account' }),
+      )
+    })
+  })
+
+  describe('checkOperationalRideEligibility', () => {
+    it('returns null when operational status is Clear', () => {
+      expect(checkOperationalRideEligibility(baseUser)).toBeNull()
+    })
+
+    it('returns OperationalBlock when status is Blocked', () => {
+      const result = checkOperationalRideEligibility({ ...baseUser, operationalStatus: 'Blocked' })
+      expect(result).toEqual(
+        expect.objectContaining({ code: 'OperationalBlock', severity: 'Hard' }),
+      )
+    })
+
+    it('returns OperationalBlock when status is UnderReview', () => {
+      const result = checkOperationalRideEligibility({
+        ...baseUser,
+        operationalStatus: 'UnderReview',
+      })
+      expect(result).toEqual(expect.objectContaining({ code: 'OperationalBlock' }))
+    })
+  })
+
+  describe('checkRideStartAvailability', () => {
+    it('returns null when user has no ride in progress', () => {
+      expect(checkRideStartAvailability(baseUser)).toBeNull()
+    })
+
+    it('returns RideInProgress when user has a ride in progress', () => {
+      const result = checkRideStartAvailability({ ...baseUser, hasRideInProgress: true })
+      expect(result).toEqual(
+        expect.objectContaining({ code: 'RideInProgress', severity: 'Hard', category: 'Ride' }),
+      )
     })
   })
 })

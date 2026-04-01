@@ -1,4 +1,6 @@
 import { type AccountStatus, isActive } from '../value-objects/AccountStatus'
+import type { BlockReason } from '../value-objects/BlockReason'
+import { blockReasons } from '../value-objects/blockReasons'
 import { allowsRideStart, type OperationalStatus } from '../value-objects/OperationalStatus'
 import type { PlanType } from '../value-objects/PlanType'
 
@@ -21,4 +23,16 @@ export function hasOperationalRestriction(user: User): boolean {
 
 export function canStartNewRide(user: User): boolean {
   return isAccountActive(user) && !hasOperationalRestriction(user) && !user.hasRideInProgress
+}
+
+export function checkAccountEligibility(user: User): BlockReason | null {
+  return !isAccountActive(user) ? blockReasons.inactiveAccount() : null
+}
+
+export function checkOperationalRideEligibility(user: User): BlockReason | null {
+  return hasOperationalRestriction(user) ? blockReasons.operationalBlock() : null
+}
+
+export function checkRideStartAvailability(user: User): BlockReason | null {
+  return user.hasRideInProgress ? blockReasons.rideInProgress() : null
 }

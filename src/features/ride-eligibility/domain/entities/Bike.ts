@@ -1,5 +1,7 @@
 import { type BikeAvailabilityStatus, isAvailable } from '../value-objects/BikeAvailabilityStatus'
 import type { BikeType } from '../value-objects/BikeType'
+import type { BlockReason } from '../value-objects/BlockReason'
+import { blockReasons } from '../value-objects/blockReasons'
 
 export type Bike = {
   readonly id: string
@@ -10,4 +12,8 @@ export type Bike = {
 
 export function isAvailableForPickup(bike: Bike): boolean {
   return isAvailable(bike.availabilityStatus)
+}
+
+export function checkBikeAvailability(bike: Bike): BlockReason | null {
+  return !isAvailableForPickup(bike) ? blockReasons.bikeUnavailable() : null
 }

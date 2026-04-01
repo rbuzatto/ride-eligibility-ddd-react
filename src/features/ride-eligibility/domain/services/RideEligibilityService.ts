@@ -1,23 +1,23 @@
-import type { Bike } from '../entities/Bike'
-import type { Station } from '../entities/Station'
-import type { User } from '../entities/User'
-import { ensureActiveAccount } from '../rules/ensureActiveAccount'
-import { ensureBikeIsAvailable } from '../rules/ensureBikeIsAvailable'
-import { ensureNoOperationalBlock } from '../rules/ensureNoOperationalBlock'
-import { ensureNoRideInProgress } from '../rules/ensureNoRideInProgress'
-import { ensurePickupIsAllowed } from '../rules/ensurePickupIsAllowed'
-import { ensurePlanCompatibility } from '../rules/ensurePlanCompatibility'
+import { type Bike, checkBikeAvailability } from '../entities/Bike'
+import { checkPickupEligibility, type Station } from '../entities/Station'
+import {
+  checkAccountEligibility,
+  checkOperationalRideEligibility,
+  checkRideStartAvailability,
+  type User,
+} from '../entities/User'
 import type { BlockReason } from '../value-objects/BlockReason'
 import type { EligibilityResult } from '../value-objects/EligibilityResult'
+import { checkPlanCompatibility } from '../value-objects/PlanType'
 
 export function checkEligibility(user: User, bike: Bike, station: Station): EligibilityResult {
   const reasons: BlockReason[] = [
-    ensureActiveAccount(user),
-    ensureNoOperationalBlock(user),
-    ensureNoRideInProgress(user),
-    ensureBikeIsAvailable(bike),
-    ensurePlanCompatibility(user, bike),
-    ensurePickupIsAllowed(station),
+    checkAccountEligibility(user),
+    checkOperationalRideEligibility(user),
+    checkRideStartAvailability(user),
+    checkBikeAvailability(bike),
+    checkPlanCompatibility(user.planType, bike.bikeType),
+    checkPickupEligibility(station),
   ].filter((reason): reason is BlockReason => reason !== null)
 
   const evaluatedAt = new Date()
