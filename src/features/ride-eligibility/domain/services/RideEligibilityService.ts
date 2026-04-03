@@ -6,8 +6,8 @@ import {
   checkRideStartAvailability,
   type User,
 } from '../entities/User'
+import type { EligibilityResult } from '../results/EligibilityResult'
 import type { BlockReason } from '../value-objects/BlockReason'
-import type { EligibilityResult } from '../value-objects/EligibilityResult'
 import { checkPlanCompatibility } from '../value-objects/PlanType'
 
 export function checkEligibility(user: User, bike: Bike, station: Station): EligibilityResult {

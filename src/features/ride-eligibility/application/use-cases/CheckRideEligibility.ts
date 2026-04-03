@@ -1,5 +1,5 @@
+import type { EligibilityResult } from '../../domain/results/EligibilityResult'
 import { checkEligibility } from '../../domain/services/RideEligibilityService'
-import type { EligibilityResult } from '../../domain/value-objects/EligibilityResult'
 import type { BikeRepository } from '../ports/BikeRepository'
 import type { StationRepository } from '../ports/StationRepository'
 import type { UserRepository } from '../ports/UserRepository'
