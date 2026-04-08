@@ -1,17 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { RideEligibilityQueries } from '../../application/queries/RideEligibilityQueries'
-import type { CheckRideEligibilityCommand } from '../../application/use-cases/CheckRideEligibility'
-import { checkEligibility } from '../../domain/services/RideEligibilityService'
-import { bikes } from '../../infrastructure/data/bikes'
-import { stations } from '../../infrastructure/data/stations'
-import { users } from '../../infrastructure/data/users'
+import type { RideEligibilityQueries } from '@/ride-elegibility/application/queries/RideEligibilityQueries'
+import type { CheckRideEligibilityCommand } from '@/ride-elegibility/application/use-cases/CheckRideEligibility'
+import { checkEligibility } from '@/ride-elegibility/domain/services/RideEligibilityService'
+import { bikes } from '@/ride-elegibility/infrastructure/data/bikes'
+import { stations } from '@/ride-elegibility/infrastructure/data/stations'
+import { users } from '@/ride-elegibility/infrastructure/data/users'
 import {
   type RideEligibilityModule,
   RideEligibilityProvider,
-} from '../context/RideEligibilityContext'
-import { RideEligibilityPage } from './RideEligibilityPage'
+} from '@/ride-elegibility/presentation/context/RideEligibilityContext'
+import { RideEligibilityPage } from '@/ride-elegibility/presentation/pages/RideEligibilityPage'
 
 function createTestModule(): RideEligibilityModule {
   const queries: RideEligibilityQueries = {
@@ -24,28 +24,28 @@ function createTestModule(): RideEligibilityModule {
     queries,
     checkRideEligibility: {
       async execute(command: CheckRideEligibilityCommand) {
-        const user = users.find((u) => u.id === command.userId)
-        if (!user)
+        if (!command.user)
           return {
             outcome: 'entity_not_found' as const,
             entity: 'User' as const,
-            id: command.userId,
+            id: 'selected-user',
           }
-        const bike = bikes.find((b) => b.id === command.bikeId)
-        if (!bike)
+        if (!command.bike)
           return {
             outcome: 'entity_not_found' as const,
             entity: 'Bike' as const,
-            id: command.bikeId,
+            id: 'selected-bike',
           }
-        const station = stations.find((s) => s.id === command.stationId)
-        if (!station)
+        if (!command.station)
           return {
             outcome: 'entity_not_found' as const,
             entity: 'Station' as const,
-            id: command.stationId,
+            id: 'selected-station',
           }
-        return { outcome: 'decided' as const, result: checkEligibility(user, bike, station) }
+        return {
+          outcome: 'decided' as const,
+          result: checkEligibility(command.user, command.bike, command.station),
+        }
       },
     },
   }

@@ -1,5 +1,8 @@
-import { allowsPickup, type PickupPolicy } from '../domain-types/PickupPolicy'
-import { type BlockReason, blockReasons } from '../value-objects/BlockReason'
+import {
+  allowsPickup,
+  type PickupPolicy,
+} from '@/ride-elegibility/domain/domain-types/PickupPolicy'
+import { type BlockReason, blockReasons } from '@/ride-elegibility/domain/value-objects/BlockReason'
 
 export type Station = {
   readonly id: string

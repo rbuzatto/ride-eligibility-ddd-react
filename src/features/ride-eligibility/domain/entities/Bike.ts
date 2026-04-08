@@ -1,6 +1,9 @@
-import { type BikeAvailabilityStatus, isAvailable } from '../domain-types/BikeAvailabilityStatus'
-import type { BikeType } from '../domain-types/BikeType'
-import { type BlockReason, blockReasons } from '../value-objects/BlockReason'
+import {
+  type BikeAvailabilityStatus,
+  isAvailable,
+} from '@/ride-elegibility/domain/domain-types/BikeAvailabilityStatus'
+import type { BikeType } from '@/ride-elegibility/domain/domain-types/BikeType'
+import { type BlockReason, blockReasons } from '@/ride-elegibility/domain/value-objects/BlockReason'
 
 export type Bike = {
   readonly id: string

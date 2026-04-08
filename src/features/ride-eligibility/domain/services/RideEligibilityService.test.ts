@@ -1,7 +1,7 @@
-import type { Bike } from '../entities/Bike'
-import type { Station } from '../entities/Station'
-import type { User } from '../entities/User'
-import { checkEligibility } from './RideEligibilityService'
+import type { Bike } from '@/ride-elegibility/domain/entities/Bike'
+import type { Station } from '@/ride-elegibility/domain/entities/Station'
+import type { User } from '@/ride-elegibility/domain/entities/User'
+import { checkEligibility } from '@/ride-elegibility/domain/services/RideEligibilityService'
 
 const validUser: User = {
   id: 'user-1',

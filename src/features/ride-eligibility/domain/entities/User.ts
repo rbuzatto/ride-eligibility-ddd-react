@@ -1,7 +1,10 @@
-import { type AccountStatus, isActive } from '../domain-types/AccountStatus'
-import { allowsRideStart, type OperationalStatus } from '../domain-types/OperationalStatus'
-import { type BlockReason, blockReasons } from '../value-objects/BlockReason'
-import type { PlanType } from '../value-objects/PlanType'
+import { type AccountStatus, isActive } from '@/ride-elegibility/domain/domain-types/AccountStatus'
+import {
+  allowsRideStart,
+  type OperationalStatus,
+} from '@/ride-elegibility/domain/domain-types/OperationalStatus'
+import { type BlockReason, blockReasons } from '@/ride-elegibility/domain/value-objects/BlockReason'
+import type { PlanType } from '@/ride-elegibility/domain/value-objects/PlanType'
 
 export type User = {
   readonly id: string

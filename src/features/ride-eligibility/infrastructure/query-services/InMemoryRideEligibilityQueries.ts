@@ -1,7 +1,7 @@
-import type { BikeRepository } from '../../application/ports/BikeRepository'
-import type { StationRepository } from '../../application/ports/StationRepository'
-import type { UserRepository } from '../../application/ports/UserRepository'
-import type { RideEligibilityQueries } from '../../application/queries/RideEligibilityQueries'
+import type { BikeRepository } from '@/ride-elegibility/application/ports/BikeRepository'
+import type { StationRepository } from '@/ride-elegibility/application/ports/StationRepository'
+import type { UserRepository } from '@/ride-elegibility/application/ports/UserRepository'
+import type { RideEligibilityQueries } from '@/ride-elegibility/application/queries/RideEligibilityQueries'
 
 export function createInMemoryRideEligibilityQueries(deps: {
   userRepository: UserRepository

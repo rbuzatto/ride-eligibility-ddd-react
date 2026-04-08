@@ -25,7 +25,8 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/ride-elegibility/*": ["./src/features/ride-eligibility/*"]
     }
   },
   "include": ["src"]

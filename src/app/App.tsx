@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { rideEligibilityModule } from '../features/ride-eligibility'
-import { RideEligibilityProvider } from '../features/ride-eligibility/presentation/context/RideEligibilityContext'
-import { RideEligibilityPage } from '../features/ride-eligibility/presentation/pages/RideEligibilityPage'
+import { rideEligibilityModule } from '@/ride-elegibility/index'
+import { RideEligibilityProvider } from '@/ride-elegibility/presentation/context/RideEligibilityContext'
+import { RideEligibilityPage } from '@/ride-elegibility/presentation/pages/RideEligibilityPage'
 
 const queryClient = new QueryClient()
 

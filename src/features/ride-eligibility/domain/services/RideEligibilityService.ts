@@ -1,14 +1,14 @@
-import { type Bike, checkBikeAvailability } from '../entities/Bike'
-import { checkPickupEligibility, type Station } from '../entities/Station'
+import { type Bike, checkBikeAvailability } from '@/ride-elegibility/domain/entities/Bike'
+import { checkPickupEligibility, type Station } from '@/ride-elegibility/domain/entities/Station'
 import {
   checkAccountEligibility,
   checkOperationalRideEligibility,
   checkRideStartAvailability,
   type User,
-} from '../entities/User'
-import type { EligibilityResult } from '../results/EligibilityResult'
-import type { BlockReason } from '../value-objects/BlockReason'
-import { checkPlanCompatibility } from '../value-objects/PlanType'
+} from '@/ride-elegibility/domain/entities/User'
+import type { EligibilityResult } from '@/ride-elegibility/domain/results/EligibilityResult'
+import type { BlockReason } from '@/ride-elegibility/domain/value-objects/BlockReason'
+import { checkPlanCompatibility } from '@/ride-elegibility/domain/value-objects/PlanType'
 
 export function checkEligibility(user: User, bike: Bike, station: Station): EligibilityResult {
   const reasons: BlockReason[] = [

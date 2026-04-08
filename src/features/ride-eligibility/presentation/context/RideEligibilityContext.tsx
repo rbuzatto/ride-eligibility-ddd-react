@@ -1,9 +1,9 @@
 import { createContext, type ReactNode, useContext } from 'react'
-import type { RideEligibilityQueries } from '../../application/queries/RideEligibilityQueries'
+import type { RideEligibilityQueries } from '@/ride-elegibility/application/queries/RideEligibilityQueries'
 import type {
   CheckRideEligibilityCommand,
   CheckRideEligibilityResult,
-} from '../../application/use-cases/CheckRideEligibility'
+} from '@/ride-elegibility/application/use-cases/CheckRideEligibility'
 
 export type RideEligibilityModule = {
   queries: RideEligibilityQueries

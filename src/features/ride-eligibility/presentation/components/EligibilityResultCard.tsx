@@ -1,7 +1,7 @@
 import { CheckCircle, ShieldAlert, TriangleAlert, XCircle } from 'lucide-react'
+import type { EligibilityCheckViewModel } from '@/ride-elegibility/presentation/view-models/EligibilityViewModel'
 import { Alert, AlertTitle } from '@/shared/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
-import type { EligibilityCheckViewModel } from '../view-models/EligibilityViewModel'
 
 type EligibilityResultCardProps = {
   viewModel: Extract<EligibilityCheckViewModel, { status: 'eligible' | 'ineligible' }>

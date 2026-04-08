@@ -1,4 +1,4 @@
-import type { BlockReason } from './BlockReason'
+import type { BlockReason } from '@/ride-elegibility/domain/value-objects/BlockReason'
 
 export type EligibleResult = {
   readonly eligible: true

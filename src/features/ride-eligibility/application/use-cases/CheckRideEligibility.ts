@@ -1,46 +1,34 @@
-import type { EligibilityResult } from '../../domain/results/EligibilityResult'
-import { checkEligibility } from '../../domain/services/RideEligibilityService'
-import type { BikeRepository } from '../ports/BikeRepository'
-import type { StationRepository } from '../ports/StationRepository'
-import type { UserRepository } from '../ports/UserRepository'
+import type { Bike } from '@/ride-elegibility/domain/entities/Bike'
+import type { Station } from '@/ride-elegibility/domain/entities/Station'
+import type { User } from '@/ride-elegibility/domain/entities/User'
+import type { EligibilityResult } from '@/ride-elegibility/domain/results/EligibilityResult'
+import { checkEligibility } from '@/ride-elegibility/domain/services/RideEligibilityService'
 
 export type CheckRideEligibilityCommand = {
-  readonly userId: string
-  readonly bikeId: string
-  readonly stationId: string
-  readonly requestedAt: Date
-}
-
-export type CheckRideEligibilityDeps = {
-  userRepository: UserRepository
-  bikeRepository: BikeRepository
-  stationRepository: StationRepository
+  readonly user: User | null
+  readonly bike: Bike | null
+  readonly station: Station | null
 }
 
 export type CheckRideEligibilityResult =
   | { outcome: 'decided'; result: EligibilityResult }
   | { outcome: 'entity_not_found'; entity: 'User' | 'Bike' | 'Station'; id: string }
 
-export function createCheckRideEligibility(deps: CheckRideEligibilityDeps) {
-  return {
-    async execute(command: CheckRideEligibilityCommand): Promise<CheckRideEligibilityResult> {
-      const user = await deps.userRepository.findById(command.userId)
-      if (!user) {
-        return { outcome: 'entity_not_found', entity: 'User', id: command.userId }
-      }
+export const checkRideEligibility = {
+  async execute(command: CheckRideEligibilityCommand): Promise<CheckRideEligibilityResult> {
+    if (!command.user) {
+      return { outcome: 'entity_not_found', entity: 'User', id: 'selected-user' }
+    }
 
-      const bike = await deps.bikeRepository.findById(command.bikeId)
-      if (!bike) {
-        return { outcome: 'entity_not_found', entity: 'Bike', id: command.bikeId }
-      }
+    if (!command.bike) {
+      return { outcome: 'entity_not_found', entity: 'Bike', id: 'selected-bike' }
+    }
 
-      const station = await deps.stationRepository.findById(command.stationId)
-      if (!station) {
-        return { outcome: 'entity_not_found', entity: 'Station', id: command.stationId }
-      }
+    if (!command.station) {
+      return { outcome: 'entity_not_found', entity: 'Station', id: 'selected-station' }
+    }
 
-      const result = checkEligibility(user, bike, station)
-      return { outcome: 'decided', result }
-    },
-  }
+    const result = checkEligibility(command.user, command.bike, command.station)
+    return { outcome: 'decided', result }
+  },
 }

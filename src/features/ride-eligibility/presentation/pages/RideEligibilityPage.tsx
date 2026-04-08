@@ -1,30 +1,13 @@
+import { EligibilityForm } from '@/ride-elegibility/presentation/components/EligibilityForm'
+import { EligibilityResultCard } from '@/ride-elegibility/presentation/components/EligibilityResultCard'
+import { useRideEligibilityPageController } from '@/ride-elegibility/presentation/controllers/useRideEligibilityPageController'
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert'
 import { Button } from '@/shared/ui/button'
-import { EligibilityForm } from '../components/EligibilityForm'
-import { EligibilityResultCard } from '../components/EligibilityResultCard'
-import { useRideEligibility } from '../hooks/useRideEligibility'
 
 export function RideEligibilityPage() {
-  const {
-    users,
-    bikes,
-    stations,
-    isLoading,
-    isError,
-    selectedUserId,
-    selectedBikeId,
-    selectedStationId,
-    setSelectedUserId,
-    setSelectedBikeId,
-    setSelectedStationId,
-    canSubmit,
-    viewModel,
-    isPending,
-    handleCheck,
-    handleReset,
-  } = useRideEligibility()
+  const { options, loadState, selection, evaluation, actions } = useRideEligibilityPageController()
 
-  if (isLoading) {
+  if (loadState.isLoading) {
     return (
       <main className="min-h-screen bg-background px-4 py-10">
         <div className="mx-auto w-full max-w-md">
@@ -34,7 +17,7 @@ export function RideEligibilityPage() {
     )
   }
 
-  if (isError) {
+  if (loadState.isError) {
     return (
       <main className="min-h-screen bg-background px-4 py-10">
         <div className="mx-auto w-full max-w-md">
@@ -58,34 +41,33 @@ export function RideEligibilityPage() {
         </div>
 
         <EligibilityForm
-          users={users}
-          bikes={bikes}
-          stations={stations}
-          selectedUserId={selectedUserId}
-          selectedBikeId={selectedBikeId}
-          selectedStationId={selectedStationId}
-          onUserChange={setSelectedUserId}
-          onBikeChange={setSelectedBikeId}
-          onStationChange={setSelectedStationId}
-          onSubmit={handleCheck}
-          canSubmit={canSubmit}
+          users={options.users}
+          bikes={options.bikes}
+          stations={options.stations}
+          selectedUserId={selection.userId}
+          selectedBikeId={selection.bikeId}
+          selectedStationId={selection.stationId}
+          onUserChange={selection.selectUser}
+          onBikeChange={selection.selectBike}
+          onStationChange={selection.selectStation}
+          onCheckEligibility={actions.checkEligibilityForSelection}
+          canCheckEligibility={evaluation.canCheckEligibility}
         />
 
-        {isPending && <p className="text-sm text-muted-foreground">Checking eligibility...</p>}
-
-        {viewModel.status === 'system_error' && (
+        {evaluation.viewModel.status === 'system_error' && (
           <Alert variant="destructive">
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{viewModel.message}</AlertDescription>
+            <AlertDescription>{evaluation.viewModel.message}</AlertDescription>
           </Alert>
         )}
 
-        {(viewModel.status === 'eligible' || viewModel.status === 'ineligible') && (
-          <EligibilityResultCard viewModel={viewModel} />
+        {(evaluation.viewModel.status === 'eligible' ||
+          evaluation.viewModel.status === 'ineligible') && (
+          <EligibilityResultCard viewModel={evaluation.viewModel} />
         )}
 
-        {viewModel.status !== 'idle' && (
-          <Button variant="outline" className="w-full" onClick={handleReset}>
+        {evaluation.hasResult && (
+          <Button variant="outline" className="w-full" onClick={actions.resetForm}>
             Reset
           </Button>
         )}

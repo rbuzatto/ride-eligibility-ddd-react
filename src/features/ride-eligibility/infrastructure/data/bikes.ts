@@ -1,4 +1,4 @@
-import type { Bike } from '../../domain/entities/Bike'
+import type { Bike } from '@/ride-elegibility/domain/entities/Bike'
 
 export const bikes: Bike[] = [
   {

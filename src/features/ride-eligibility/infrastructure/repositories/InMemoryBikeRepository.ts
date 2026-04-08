@@ -1,5 +1,5 @@
-import type { BikeRepository } from '../../application/ports/BikeRepository'
-import { bikes } from '../data/bikes'
+import type { BikeRepository } from '@/ride-elegibility/application/ports/BikeRepository'
+import { bikes } from '@/ride-elegibility/infrastructure/data/bikes'
 import { delay } from './delay'
 
 export function createInMemoryBikeRepository(): BikeRepository {

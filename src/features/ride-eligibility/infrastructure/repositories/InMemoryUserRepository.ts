@@ -1,5 +1,5 @@
-import type { UserRepository } from '../../application/ports/UserRepository'
-import { users } from '../data/users'
+import type { UserRepository } from '@/ride-elegibility/application/ports/UserRepository'
+import { users } from '@/ride-elegibility/infrastructure/data/users'
 import { delay } from './delay'
 
 export function createInMemoryUserRepository(): UserRepository {

@@ -6,8 +6,15 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
+    alias: [
+      {
+        find: /^@\/ride-elegibility\/(.*)$/,
+        replacement: `${path.resolve(__dirname, './src/features/ride-eligibility')}/$1`,
+      },
+      {
+        find: /^@\/(?!ride-elegibility\/)(.*)$/,
+        replacement: `${path.resolve(__dirname, './src')}/$1`,
+      },
+    ],
   },
 })

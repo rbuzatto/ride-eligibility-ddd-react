@@ -1,4 +1,4 @@
-import type { BikeType } from '../domain-types/BikeType'
+import type { BikeType } from '@/ride-elegibility/domain/domain-types/BikeType'
 import { type BlockReason, blockReasons } from './BlockReason'
 
 export type PlanType = 'Basic' | 'Premium'

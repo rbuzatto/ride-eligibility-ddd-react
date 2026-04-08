@@ -1,11 +1,15 @@
-import type { CheckRideEligibilityResult } from '../../application/use-cases/CheckRideEligibility'
-import type { BlockReason } from '../../domain/value-objects/BlockReason'
-import type { BlockReasonView, EligibilityCheckViewModel } from './EligibilityViewModel'
+import type { CheckRideEligibilityResult } from '@/ride-elegibility/application/use-cases/CheckRideEligibility'
+import type { BlockReason } from '@/ride-elegibility/domain/value-objects/BlockReason'
+import type {
+  BlockReasonView,
+  EligibilityCheckViewModel,
+} from '@/ride-elegibility/presentation/view-models/EligibilityViewModel'
 
 function mapBlockReason(reason: BlockReason): BlockReasonView {
   return {
     code: reason.code,
     label: reason.message,
+    // @TODO: should reflect a business rule
     severity: reason.severity === 'Hard' ? 'hard' : 'soft',
     category: reason.category,
   }

@@ -1,4 +1,4 @@
-import type { Station } from '../../domain/entities/Station'
+import type { Station } from '@/ride-elegibility/domain/entities/Station'
 
 export const stations: Station[] = [
   {

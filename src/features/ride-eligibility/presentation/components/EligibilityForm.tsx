@@ -1,9 +1,9 @@
+import type { Bike } from '@/ride-elegibility/domain/entities/Bike'
+import type { Station } from '@/ride-elegibility/domain/entities/Station'
+import type { User } from '@/ride-elegibility/domain/entities/User'
 import { Button } from '@/shared/ui/button'
 import { Label } from '@/shared/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
-import type { Bike } from '../../domain/entities/Bike'
-import type { Station } from '../../domain/entities/Station'
-import type { User } from '../../domain/entities/User'
 
 type EligibilityFormProps = {
   users: User[]
@@ -15,8 +15,8 @@ type EligibilityFormProps = {
   onUserChange: (id: string | null) => void
   onBikeChange: (id: string | null) => void
   onStationChange: (id: string | null) => void
-  onSubmit: () => void
-  canSubmit: boolean
+  onCheckEligibility: () => void
+  canCheckEligibility: boolean
 }
 
 export function EligibilityForm({
@@ -29,22 +29,31 @@ export function EligibilityForm({
   onUserChange,
   onBikeChange,
   onStationChange,
-  onSubmit,
-  canSubmit,
+  onCheckEligibility,
+  canCheckEligibility,
 }: EligibilityFormProps) {
+  const selectedUserLabel = users.find((user) => user.id === selectedUserId)?.name ?? null
+  const selectedBikeLabel = bikes.find((bike) => bike.id === selectedBikeId)?.model ?? null
+  const selectedStationLabel =
+    stations.find((station) => station.id === selectedStationId)?.name ?? null
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        onSubmit()
+        onCheckEligibility()
       }}
       className="flex flex-col gap-4"
     >
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="user-select">User</Label>
-        <Select value={selectedUserId || undefined} onValueChange={onUserChange}>
+        <Select
+          key={selectedUserId || 'empty-user'}
+          value={selectedUserId || undefined}
+          onValueChange={onUserChange}
+        >
           <SelectTrigger id="user-select" className="w-full">
-            <SelectValue placeholder="Select a user" />
+            <SelectValue placeholder="Select a user">{selectedUserLabel}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {users.map((user) => (
@@ -58,9 +67,13 @@ export function EligibilityForm({
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="bike-select">Bike</Label>
-        <Select value={selectedBikeId || undefined} onValueChange={onBikeChange}>
+        <Select
+          key={selectedBikeId || 'empty-bike'}
+          value={selectedBikeId || undefined}
+          onValueChange={onBikeChange}
+        >
           <SelectTrigger id="bike-select" className="w-full">
-            <SelectValue placeholder="Select a bike" />
+            <SelectValue placeholder="Select a bike">{selectedBikeLabel}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {bikes.map((bike) => (
@@ -74,9 +87,13 @@ export function EligibilityForm({
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="station-select">Station</Label>
-        <Select value={selectedStationId || undefined} onValueChange={onStationChange}>
+        <Select
+          key={selectedStationId || 'empty-station'}
+          value={selectedStationId || undefined}
+          onValueChange={onStationChange}
+        >
           <SelectTrigger id="station-select" className="w-full">
-            <SelectValue placeholder="Select a station" />
+            <SelectValue placeholder="Select a station">{selectedStationLabel}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {stations.map((station) => (
@@ -88,7 +105,7 @@ export function EligibilityForm({
         </Select>
       </div>
 
-      <Button type="submit" disabled={!canSubmit}>
+      <Button type="submit" disabled={!canCheckEligibility}>
         Check Eligibility
       </Button>
     </form>

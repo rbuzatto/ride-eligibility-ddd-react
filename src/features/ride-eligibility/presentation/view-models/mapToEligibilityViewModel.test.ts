@@ -1,5 +1,5 @@
-import type { CheckRideEligibilityResult } from '../../application/use-cases/CheckRideEligibility'
-import { mapToEligibilityViewModel } from './mapToEligibilityViewModel'
+import type { CheckRideEligibilityResult } from '@/ride-elegibility/application/use-cases/CheckRideEligibility'
+import { mapToEligibilityViewModel } from '@/ride-elegibility/presentation/view-models/mapToEligibilityViewModel'
 
 describe('mapToEligibilityViewModel', () => {
   it('returns idle when result is null', () => {

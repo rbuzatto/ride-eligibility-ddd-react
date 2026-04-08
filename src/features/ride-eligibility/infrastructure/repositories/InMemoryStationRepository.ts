@@ -1,5 +1,5 @@
-import type { StationRepository } from '../../application/ports/StationRepository'
-import { stations } from '../data/stations'
+import type { StationRepository } from '@/ride-elegibility/application/ports/StationRepository'
+import { stations } from '@/ride-elegibility/infrastructure/data/stations'
 import { delay } from './delay'
 
 export function createInMemoryStationRepository(): StationRepository {
