@@ -9,7 +9,6 @@ function mapBlockReason(reason: BlockReason): BlockReasonView {
   return {
     code: reason.code,
     label: reason.message,
-    // @TODO: should reflect a business rule
     severity: reason.severity === 'Hard' ? 'hard' : 'soft',
     category: reason.category,
   }
