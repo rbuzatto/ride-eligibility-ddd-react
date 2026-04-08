@@ -11,43 +11,48 @@ export function useRideEligibilityPageController() {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [selectedBikeId, setSelectedBikeId] = useState('')
   const [selectedStationId, setSelectedStationId] = useState('')
-  const [lastEvaluation, setLastEvaluation] = useState<CheckRideEligibilityResult | null>(null)
 
-  const viewModel = mapToEligibilityViewModel(lastEvaluation)
+  const selectedUser = users.find((user) => user.id === selectedUserId) ?? null
+  const selectedBike = bikes.find((bike) => bike.id === selectedBikeId) ?? null
+  const selectedStation = stations.find((station) => station.id === selectedStationId) ?? null
+  const canCheckEligibility = selectedUser !== null && selectedBike !== null && selectedStation !== null
+  const [eligibilityResult, setEligibilityResult] = useState<CheckRideEligibilityResult | null>(null)
 
-  function clearEvaluation() {
-    setLastEvaluation(null)
+  const viewModel = mapToEligibilityViewModel(eligibilityResult)
+
+  function resetEligibilityResult() {
+    setEligibilityResult(null)
   }
 
   async function checkEligibilityForSelection() {
     const result = await checkRideEligibility.execute({
-      user: users.find((user) => user.id === selectedUserId) ?? null,
-      bike: bikes.find((bike) => bike.id === selectedBikeId) ?? null,
-      station: stations.find((station) => station.id === selectedStationId) ?? null,
+      user: selectedUser,
+      bike: selectedBike,
+      station: selectedStation,
     })
 
-    setLastEvaluation(result)
+    setEligibilityResult(result)
   }
 
   function resetForm() {
     setSelectedUserId('')
     setSelectedBikeId('')
     setSelectedStationId('')
-    clearEvaluation()
+    resetEligibilityResult()
   }
 
   function selectUser(id: string | null) {
-    clearEvaluation()
+    resetEligibilityResult()
     setSelectedUserId(id ?? '')
   }
 
   function selectBike(id: string | null) {
-    clearEvaluation()
+    resetEligibilityResult()
     setSelectedBikeId(id ?? '')
   }
 
   function selectStation(id: string | null) {
-    clearEvaluation()
+    resetEligibilityResult()
     setSelectedStationId(id ?? '')
   }
 
@@ -71,8 +76,7 @@ export function useRideEligibilityPageController() {
     },
     evaluation: {
       viewModel,
-      canCheckEligibility:
-        selectedUserId !== '' && selectedBikeId !== '' && selectedStationId !== '',
+      canCheckEligibility,
       hasResult: viewModel.status !== 'idle',
     },
     actions: {
