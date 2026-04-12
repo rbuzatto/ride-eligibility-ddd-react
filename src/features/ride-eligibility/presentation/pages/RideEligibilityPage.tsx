@@ -1,13 +1,51 @@
+import { useCheckRideEligibility } from '@/ride-elegibility/presentation/commands/useCheckRideEligibility'
 import { EligibilityForm } from '@/ride-elegibility/presentation/components/EligibilityForm'
 import { EligibilityResultCard } from '@/ride-elegibility/presentation/components/EligibilityResultCard'
-import { useRideEligibilityPageController } from '@/ride-elegibility/presentation/controllers/useRideEligibilityPageController'
+import { useRideEligibilityModule } from '@/ride-elegibility/presentation/context/RideEligibilityContext'
+import { useRideEligibilityForm } from '@/ride-elegibility/presentation/form/useRideEligibilityForm'
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert'
 import { Button } from '@/shared/ui/button'
+import { useRideEligibilityOptionsQuery } from '../queries/useRideEligibilityOptionsQuery'
 
 export function RideEligibilityPage() {
-  const { options, loadState, selection, evaluation, actions } = useRideEligibilityPageController()
+  const { checkRideEligibility } = useRideEligibilityModule()
+  const options = useRideEligibilityOptionsQuery()
+  const form = useRideEligibilityForm({
+    users: options.users,
+    bikes: options.bikes,
+    stations: options.stations,
+  })
+  const checkRideEligibilityCommand = useCheckRideEligibility({ checkRideEligibility })
 
-  if (loadState.isLoading) {
+  function handleUserChange(id: string | null) {
+    checkRideEligibilityCommand.resetEvaluation()
+    form.setUserId(id ?? '')
+  }
+
+  function handleBikeChange(id: string | null) {
+    checkRideEligibilityCommand.resetEvaluation()
+    form.setBikeId(id ?? '')
+  }
+
+  function handleStationChange(id: string | null) {
+    checkRideEligibilityCommand.resetEvaluation()
+    form.setStationId(id ?? '')
+  }
+
+  async function handleCheckEligibility() {
+    await checkRideEligibilityCommand.checkEligibilityForSelection({
+      user: form.user,
+      bike: form.bike,
+      station: form.station,
+    })
+  }
+
+  function handleReset() {
+    form.resetSelection()
+    checkRideEligibilityCommand.resetEvaluation()
+  }
+
+  if (options.isLoading) {
     return (
       <main className="min-h-screen bg-background px-4 py-10">
         <div className="mx-auto w-full max-w-md">
@@ -17,7 +55,7 @@ export function RideEligibilityPage() {
     )
   }
 
-  if (loadState.isError) {
+  if (options.isError) {
     return (
       <main className="min-h-screen bg-background px-4 py-10">
         <div className="mx-auto w-full max-w-md">
@@ -44,30 +82,30 @@ export function RideEligibilityPage() {
           users={options.users}
           bikes={options.bikes}
           stations={options.stations}
-          selectedUserId={selection.userId}
-          selectedBikeId={selection.bikeId}
-          selectedStationId={selection.stationId}
-          onUserChange={selection.selectUser}
-          onBikeChange={selection.selectBike}
-          onStationChange={selection.selectStation}
-          onCheckEligibility={actions.checkEligibilityForSelection}
-          canCheckEligibility={evaluation.canCheckEligibility}
+          selectedUserId={form.user?.id ?? ''}
+          selectedBikeId={form.bike?.id ?? ''}
+          selectedStationId={form.station?.id ?? ''}
+          onUserChange={handleUserChange}
+          onBikeChange={handleBikeChange}
+          onStationChange={handleStationChange}
+          onCheckEligibility={handleCheckEligibility}
+          canCheckEligibility={form.canCheckEligibility}
         />
 
-        {evaluation.viewModel.status === 'system_error' && (
+        {checkRideEligibilityCommand.viewModel.status === 'system_error' && (
           <Alert variant="destructive">
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{evaluation.viewModel.message}</AlertDescription>
+            <AlertDescription>{checkRideEligibilityCommand.viewModel.message}</AlertDescription>
           </Alert>
         )}
 
-        {(evaluation.viewModel.status === 'eligible' ||
-          evaluation.viewModel.status === 'ineligible') && (
-          <EligibilityResultCard viewModel={evaluation.viewModel} />
+        {(checkRideEligibilityCommand.viewModel.status === 'eligible' ||
+          checkRideEligibilityCommand.viewModel.status === 'ineligible') && (
+          <EligibilityResultCard viewModel={checkRideEligibilityCommand.viewModel} />
         )}
 
-        {evaluation.hasResult && (
-          <Button variant="outline" className="w-full" onClick={actions.resetForm}>
+        {checkRideEligibilityCommand.hasResult && (
+          <Button variant="outline" className="w-full" onClick={handleReset}>
             Reset
           </Button>
         )}
